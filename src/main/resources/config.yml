@@ -1,0 +1,25 @@
+database:
+    url: localhost
+    database: atherna
+    user: atherna
+    password: secret
+characters:
+    defaults:
+        name: New Character
+        age: 21
+        gender: Unknown
+        description: ''
+        health: 20
+        max-health: 20
+        mana: 20
+        max-mana: 20
+        food-level: 20
+    restrictions:
+        gender:
+            - Male
+            - Female
+            - Other
+            - Unknown
+        age:
+            minimum: 0
+            maximum: 1000

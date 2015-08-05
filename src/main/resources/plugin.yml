@@ -1,0 +1,9 @@
+name: ${project.name}
+author: alyphen
+version: ${project.version}
+main: com.seventh_root.atherna.Atherna
+commands:
+    character:
+        description: Character management command
+        usage: /<command> [card|set|hide|unhide|switch]
+        aliases: [char, c]
