@@ -20,6 +20,7 @@ public class Atherna extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         try {
             databaseConnection = DriverManager.getConnection(
                     "jdbc:mysql://" + getConfig().getString("url") + "/" + getConfig().getString("database"),
