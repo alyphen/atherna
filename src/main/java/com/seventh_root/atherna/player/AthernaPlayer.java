@@ -115,7 +115,7 @@ public class AthernaPlayer {
     public void insert() {
         Connection connection = plugin.getDatabaseConnection();
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO atherna_player (minecraft_uuid, active_character_id) VALUES(?, ?)",
+                "INSERT INTO atherna_player(minecraft_uuid, active_character_id) VALUES(?, ?)",
                 RETURN_GENERATED_KEYS
         )) {
             statement.setString(1, getBukkitPlayer().getUniqueId().toString());
