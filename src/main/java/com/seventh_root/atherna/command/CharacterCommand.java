@@ -278,8 +278,12 @@ public class CharacterCommand implements CommandExecutor {
                         .collect(Collectors.toList());
                 if (filteredCharacters.size() == 1) {
                     AthernaCharacter character = filteredCharacters.get(0);
-                    player.setActiveCharacter(character);
-                    sender.sendMessage(GREEN + "Character switched to " + character.getName());
+                    if (!character.isDead()) {
+                        player.setActiveCharacter(character);
+                        sender.sendMessage(GREEN + "Character switched to " + character.getName());
+                    } else {
+                        sender.sendMessage(RED + "That character is dead");
+                    }
                 } else if (filteredCharacters.size() == 0) {
                     sender.sendMessage(RED + "Could not find any characters by that name.");
                 } else {
