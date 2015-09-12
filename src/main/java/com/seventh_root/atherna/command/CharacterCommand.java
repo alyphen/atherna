@@ -36,11 +36,13 @@ public class CharacterCommand implements CommandExecutor {
                 characterNew(sender);
             } else if (args[0].equalsIgnoreCase("switch")) {
                 characterSwitch(sender, args);
+            } else if (args[0].equalsIgnoreCase("extenddescription")) {
+                characterExtendDescription(sender, args);
             } else {
-                sender.sendMessage(RED + "Usage: /" + label + " [card|set|hide|unhide|new|switch]");
+                sender.sendMessage(RED + "Usage: /" + label + " [card|set|hide|unhide|new|switch|extenddescription]");
             }
         } else {
-            sender.sendMessage(RED + "Usage: /" + label + " [card|set|hide|unhide|new|switch]");
+            sender.sendMessage(RED + "Usage: /" + label + " [card|set|hide|unhide|new|switch|extenddescription]");
         }
         return true;
     }
@@ -275,6 +277,36 @@ public class CharacterCommand implements CommandExecutor {
             }
         } else {
             sender.sendMessage(RED + "You must be a player to perform this command");
+        }
+    }
+
+    public void characterExtendDescription(CommandSender sender, String[] args) {
+        if (sender instanceof Player) {
+            Player bukkitPlayer = (Player) sender;
+            AthernaPlayer player = plugin.getPlayerManager().getByBukkitPlayer(bukkitPlayer);
+            if (player != null) {
+                AthernaCharacter character = player.getActiveCharacter();
+                if (character != null) {
+                    if (args.length > 2) {
+                        StringBuilder descriptionBuilder = new StringBuilder();
+                        descriptionBuilder.append(" ");
+                        for (int i = 2; i < args.length; i++) {
+                            descriptionBuilder.append(args[i]).append(" ");
+                        }
+                        String description = descriptionBuilder.toString();
+                        character.setDescription(character.getDescription() + description);
+                        sender.sendMessage(GREEN + "Character description set to \"" + description + "\"");
+                    } else {
+                        sender.sendMessage(RED + "You must specify a description");
+                    }
+                } else {
+                    sender.sendMessage(RED + "You do not currently have a character");
+                }
+            } else {
+                sender.sendMessage(RED + "You do not currently have an Atherna player associated");
+            }
+        } else {
+            sender.sendMessage(RED + "You must be a player to perform that command");
         }
     }
 
