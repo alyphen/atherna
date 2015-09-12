@@ -113,8 +113,18 @@ public class CharacterCommand implements CommandExecutor {
         if (args.length > 2) {
             try {
                 int age = Integer.parseInt(args[2]);
-                character.setAge(age);
-                sender.sendMessage(GREEN + "Character age set to " + age);
+                int minimumAge = plugin.getConfig().getInt("characters.restrictions.age.minimum", 0);
+                int maximumAge = plugin.getConfig().getInt("characters.restrictions.age.maximum", 1000);
+                if (age >= minimumAge) {
+                    if (age <= maximumAge) {
+                        character.setAge(age);
+                        sender.sendMessage(GREEN + "Character age set to " + age);
+                    } else {
+                        sender.sendMessage(RED + "You may not set an age greater than " + maximumAge);
+                    }
+                } else {
+                    sender.sendMessage(RED + "You may not set an age smaller than " + minimumAge);
+                }
             } catch (NumberFormatException exception) {
                 sender.sendMessage(RED + "Age must be an integer");
             }
@@ -130,7 +140,7 @@ public class CharacterCommand implements CommandExecutor {
                 character.setGender(args[2]);
                 sender.sendMessage(GREEN + "Character gender set to " + args[2]);
             } else {
-                sender.sendMessage(RED + "Gender must be one of the following: ");
+                sender.sendMessage(RED + "Gender must be one of the following (case-sensitive): ");
                 for (String gender : acceptableGenders) {
                     sender.sendMessage(RED + " - " + gender);
                 }

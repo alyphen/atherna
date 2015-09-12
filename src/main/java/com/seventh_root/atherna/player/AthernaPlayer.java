@@ -50,6 +50,11 @@ public class AthernaPlayer {
             return this;
         }
 
+        public Builder activeCharacterId(int activeCharacterId) {
+            this.activeCharacterId = activeCharacterId;
+            return this;
+        }
+
         public AthernaPlayer build() {
             if (activeCharacterId == 0) {
                 activeCharacter(plugin.getCharacterManager().createDefaultCharacter());
@@ -114,46 +119,57 @@ public class AthernaPlayer {
 
     public void insert() {
         Connection connection = plugin.getDatabaseConnection();
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO atherna_player(minecraft_uuid, active_character_id) VALUES(?, ?)",
-                RETURN_GENERATED_KEYS
-        )) {
-            statement.setString(1, getBukkitPlayer().getUniqueId().toString());
-            statement.setInt(2, getActiveCharacter().getId());
-            statement.executeUpdate();
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                setId(generatedKeys.getInt(1));
+        if (connection != null) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO atherna_player(minecraft_uuid, active_character_id) VALUES(?, ?)",
+                    RETURN_GENERATED_KEYS
+            )) {
+                statement.setString(1, getBukkitPlayer().getUniqueId().toString());
+                statement.setInt(2, getActiveCharacter().getId());
+                statement.executeUpdate();
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    setId(generatedKeys.getInt(1));
+                }
+            } catch (SQLException exception) {
+                plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to create a player", exception);
             }
-        } catch (SQLException exception) {
-            plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to create a player", exception);
+        } else {
+            plugin.getLogger().log(SEVERE, "Database connection is not available. Cannot create player.");
         }
     }
 
     public void update() {
         Connection connection = plugin.getDatabaseConnection();
-        try (PreparedStatement statement = connection.prepareStatement(
-                "UPDATE atherna_player SET minecraft_uuid = ?, active_character_id = ? WHERE id = ?"
-        )) {
-            statement.setString(1, getBukkitPlayer().getUniqueId().toString());
-            statement.setInt(2, getActiveCharacter().getId());
-            statement.setInt(3, getId());
-            statement.executeUpdate();
-        } catch (SQLException exception) {
-            plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to update a player", exception);
+        if (connection != null) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE atherna_player SET minecraft_uuid = ?, active_character_id = ? WHERE id = ?"
+            )) {
+                statement.setString(1, getBukkitPlayer().getUniqueId().toString());
+                statement.setInt(2, getActiveCharacter().getId());
+                statement.setInt(3, getId());
+                statement.executeUpdate();
+            } catch (SQLException exception) {
+                plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to update a player", exception);
+            }
+        } else {
+            plugin.getLogger().log(SEVERE, "Database connection is not available. Cannot update player.");
         }
     }
 
     public void delete() {
         Connection connection = plugin.getDatabaseConnection();
-        try (PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM atherna_player WHERE id = ?"
-        )) {
-            statement.setInt(1, getId());
-            statement.executeUpdate();
-            plugin.getPlayerManager().uncache(this);
-        } catch (SQLException exception) {
-            plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to update a player", exception);
+        if (connection != null) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "DELETE FROM atherna_player WHERE id = ?"
+            )) {
+                statement.setInt(1, getId());
+                statement.executeUpdate();
+            } catch (SQLException exception) {
+                plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to delete a player", exception);
+            }
+        } else {
+            plugin.getLogger().log(SEVERE, "Database connection is not available. Cannot delete player.");
         }
     }
 

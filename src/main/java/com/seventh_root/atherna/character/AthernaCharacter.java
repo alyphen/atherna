@@ -1,6 +1,7 @@
 package com.seventh_root.atherna.character;
 
 import com.seventh_root.atherna.Atherna;
+import com.seventh_root.atherna.classes.AthernaClass;
 import com.seventh_root.atherna.player.AthernaPlayer;
 import org.bukkit.Location;
 
@@ -32,6 +33,7 @@ public class AthernaCharacter {
     private int mana;
     private int maxMana;
     private int foodLevel;
+    private int classId;
     private Location location;
     private boolean dead;
 
@@ -54,6 +56,7 @@ public class AthernaCharacter {
         private int mana;
         private int maxMana;
         private int foodLevel;
+        private int classId;
         private Location location;
         private boolean dead;
 
@@ -107,7 +110,13 @@ public class AthernaCharacter {
         }
 
         public Builder player(AthernaPlayer player) {
-            this.playerId = player.getId();
+            if (player != null)
+                this.playerId = player.getId();
+            return this;
+        }
+
+        public Builder playerId(int playerId) {
+            this.playerId = playerId;
             return this;
         }
 
@@ -136,6 +145,17 @@ public class AthernaCharacter {
             return this;
         }
 
+        public Builder athernaClass(AthernaClass athernaClass) {
+            if (athernaClass != null)
+                this.classId = athernaClass.getId();
+            return this;
+        }
+
+        public Builder athernaClassId(int athernaClassId) {
+            this.classId = athernaClassId;
+            return this;
+        }
+
         public Builder location(Location location) {
             this.location = location;
             return this;
@@ -150,11 +170,11 @@ public class AthernaCharacter {
             if (id == 0) {
                 return new AthernaCharacter(plugin, name, nameHidden, age, ageHidden, gender, genderHidden, description,
                         descriptionHidden, plugin.getPlayerManager().getById(playerId), health, maxHealth, mana,
-                        maxMana, foodLevel, location, dead);
+                        maxMana, foodLevel, plugin.getClassManager().getById(classId), location, dead);
             } else {
                 return new AthernaCharacter(plugin, id, name, nameHidden, age, ageHidden, gender, genderHidden,
                         description, descriptionHidden, plugin.getPlayerManager().getById(playerId), health, maxHealth,
-                        mana, maxMana, foodLevel, location, dead);
+                        mana, maxMana, foodLevel, plugin.getClassManager().getById(classId), location, dead);
             }
         }
 
@@ -163,7 +183,7 @@ public class AthernaCharacter {
     private AthernaCharacter(Atherna plugin, int id, String name, boolean nameHidden, int age, boolean ageHidden,
                              String gender, boolean genderHidden, String description, boolean descriptionHidden,
                              AthernaPlayer player, double health, double maxHealth, int mana, int maxMana,
-                             int foodLevel, Location location, boolean dead) {
+                             int foodLevel, AthernaClass athernaClass, Location location, boolean dead) {
         this.plugin = plugin;
         this.id = id;
         this.name = name;
@@ -174,22 +194,25 @@ public class AthernaCharacter {
         this.genderHidden = genderHidden;
         this.description = description;
         this.descriptionHidden = descriptionHidden;
-        this.playerId = player.getId();
+        if (player !=  null)
+            this.playerId = player.getId();
         this.health = health;
         this.maxHealth = maxHealth;
         this.mana = mana;
         this.maxMana = maxMana;
         this.foodLevel = foodLevel;
+        if (athernaClass != null)
+            this.classId = athernaClass.getId();
         this.location = location;
         this.dead = dead;
     }
 
     private AthernaCharacter(Atherna plugin, String name, boolean nameHidden, int age, boolean ageHidden, String gender,
                              boolean genderHidden, String description, boolean descriptionHidden, AthernaPlayer player,
-                             double health, double maxHealth, int mana, int maxMana, int foodLevel, Location location,
-                             boolean dead) {
+                             double health, double maxHealth, int mana, int maxMana, int foodLevel,
+                             AthernaClass athernaClass, Location location, boolean dead) {
         this(plugin, 0, name, nameHidden, age, ageHidden, gender, genderHidden, description, descriptionHidden, player,
-                health, maxHealth, mana, maxMana, foodLevel, location, dead);
+                health, maxHealth, mana, maxMana, foodLevel, athernaClass, location, dead);
         insert();
     }
 
@@ -274,12 +297,17 @@ public class AthernaCharacter {
     }
 
     public AthernaPlayer getPlayer() {
-        return plugin.getPlayerManager().getById(playerId);
+        if (playerId != 0)
+            return plugin.getPlayerManager().getById(playerId);
+        else
+            return null;
     }
 
     public void setPlayer(AthernaPlayer player) {
-        this.playerId = player.getId();
-        update();
+        if (player != null) {
+            this.playerId = player.getId();
+            update();
+        }
     }
 
     public double getHealth() {
@@ -326,6 +354,20 @@ public class AthernaCharacter {
         this.foodLevel = foodLevel;
     }
 
+    public AthernaClass getAthernaClass() {
+        if (classId != 0)
+            return plugin.getClassManager().getById(classId);
+        else
+            return null;
+    }
+
+    public void setAthernaClass(AthernaClass athernaClass) {
+        if (athernaClass != null) {
+            this.classId = athernaClass.getId();
+            update();
+        }
+    }
+
     public Location getLocation() {
         return location;
     }
@@ -346,96 +388,118 @@ public class AthernaCharacter {
 
     public void insert() {
         Connection connection = plugin.getDatabaseConnection();
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO atherna_character(name, name_hidden, age, age_hidden, gender, gender_hidden, " +
-                        "description, description_hidden, player_id, health, max_health, mana, max_mana, food_level, " +
-                        "world, x, y, z, yaw, pitch, dead) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
-                        "?, ?, ?, ?)",
-                RETURN_GENERATED_KEYS
-        )) {
-            statement.setString(1, getName());
-            statement.setBoolean(2, isNameHidden());
-            statement.setInt(3, getAge());
-            statement.setBoolean(4, isAgeHidden());
-            statement.setString(5, getGender());
-            statement.setBoolean(6, isGenderHidden());
-            statement.setString(7, getDescription());
-            statement.setBoolean(8, isDescriptionHidden());
-            if (getPlayer() != null)
-                statement.setInt(9, getPlayer().getId());
-            else
-                statement.setNull(9, INTEGER);
-            statement.setDouble(10, getHealth());
-            statement.setDouble(11, getMaxHealth());
-            statement.setInt(12, getMana());
-            statement.setInt(13, getMaxMana());
-            statement.setInt(14, getFoodLevel());
-            statement.setString(15, getLocation().getWorld().getName());
-            statement.setDouble(16, getLocation().getX());
-            statement.setDouble(17, getLocation().getY());
-            statement.setDouble(18, getLocation().getZ());
-            statement.setFloat(19, getLocation().getYaw());
-            statement.setFloat(20, getLocation().getPitch());
-            statement.setBoolean(21, isDead());
-            statement.executeUpdate();
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                setId(generatedKeys.getInt(1));
+        if (connection != null) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO atherna_character(name, name_hidden, age, age_hidden, gender, gender_hidden, " +
+                            "description, description_hidden, player_id, health, max_health, mana, max_mana, food_level, " +
+                            "class_id, world, x, y, z, yaw, pitch, dead) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
+                            "?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    RETURN_GENERATED_KEYS
+            )) {
+                statement.setString(1, getName());
+                statement.setBoolean(2, isNameHidden());
+                statement.setInt(3, getAge());
+                statement.setBoolean(4, isAgeHidden());
+                statement.setString(5, getGender());
+                statement.setBoolean(6, isGenderHidden());
+                statement.setString(7, getDescription());
+                statement.setBoolean(8, isDescriptionHidden());
+                if (getPlayer() != null)
+                    statement.setInt(9, getPlayer().getId());
+                else
+                    statement.setNull(9, INTEGER);
+                statement.setDouble(10, getHealth());
+                statement.setDouble(11, getMaxHealth());
+                statement.setInt(12, getMana());
+                statement.setInt(13, getMaxMana());
+                statement.setInt(14, getFoodLevel());
+                if (getAthernaClass() != null)
+                    statement.setInt(15, getAthernaClass().getId());
+                else
+                    statement.setNull(15, INTEGER);
+                statement.setString(16, getLocation().getWorld().getName());
+                statement.setDouble(17, getLocation().getX());
+                statement.setDouble(18, getLocation().getY());
+                statement.setDouble(19, getLocation().getZ());
+                statement.setFloat(20, getLocation().getYaw());
+                statement.setFloat(21, getLocation().getPitch());
+                statement.setBoolean(22, isDead());
+                statement.executeUpdate();
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    setId(generatedKeys.getInt(1));
+                }
+            } catch (SQLException exception) {
+                plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to create a character",
+                        exception);
             }
-        } catch (SQLException exception) {
-            plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to create a character");
+        } else {
+            plugin.getLogger().log(SEVERE, "Database connection is not available. Cannot create character..");
         }
     }
 
     public void update() {
-        try (PreparedStatement statement = plugin.getDatabaseConnection().prepareStatement(
-                "UPDATE atherna_character SET name = ?, name_hidden = ?, age = ?, age_hidden = ?, gender = ?, " +
-                        "gender_hidden = ?, description = ?, description_hidden = ?, player_id = ?, health = ?, " +
-                        "max_health = ?, mana = ?, max_mana = ?, food_level = ?, world = ?, x = ?, y = ?, z = ?, " +
-                        "yaw = ?, pitch = ?, dead = ? WHERE id = ?"
-        )) {
-            statement.setString(1, getName());
-            statement.setBoolean(2, isNameHidden());
-            statement.setInt(3, getAge());
-            statement.setBoolean(4, isAgeHidden());
-            statement.setString(5, getGender());
-            statement.setBoolean(6, isGenderHidden());
-            statement.setString(7, getDescription());
-            statement.setBoolean(8, isDescriptionHidden());
-            if (getPlayer() != null)
-                statement.setInt(9, getPlayer().getId());
-            else
-                statement.setNull(9, INTEGER);
-            statement.setDouble(10, getHealth());
-            statement.setDouble(11, getMaxHealth());
-            statement.setInt(12, getMana());
-            statement.setInt(13, getMaxMana());
-            statement.setInt(14, getFoodLevel());
-            statement.setString(15, getLocation().getWorld().getName());
-            statement.setDouble(16, getLocation().getX());
-            statement.setDouble(17, getLocation().getY());
-            statement.setDouble(18, getLocation().getZ());
-            statement.setFloat(19, getLocation().getYaw());
-            statement.setFloat(20, getLocation().getPitch());
-            statement.setBoolean(21, isDead());
-            statement.setInt(22, getId());
-            statement.executeUpdate();
-        } catch (SQLException exception) {
-            plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to update a character");
+        Connection connection = plugin.getDatabaseConnection();
+        if (connection != null) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE atherna_character SET name = ?, name_hidden = ?, age = ?, age_hidden = ?, gender = ?, " +
+                            "gender_hidden = ?, description = ?, description_hidden = ?, player_id = ?, health = ?, " +
+                            "max_health = ?, mana = ?, max_mana = ?, food_level = ?, class_id = ?, world = ?, x = ?, " +
+                            "y = ?, z = ?, yaw = ?, pitch = ?, dead = ? WHERE id = ?"
+            )) {
+                statement.setString(1, getName());
+                statement.setBoolean(2, isNameHidden());
+                statement.setInt(3, getAge());
+                statement.setBoolean(4, isAgeHidden());
+                statement.setString(5, getGender());
+                statement.setBoolean(6, isGenderHidden());
+                statement.setString(7, getDescription());
+                statement.setBoolean(8, isDescriptionHidden());
+                if (getPlayer() != null)
+                    statement.setInt(9, getPlayer().getId());
+                else
+                    statement.setNull(9, INTEGER);
+                statement.setDouble(10, getHealth());
+                statement.setDouble(11, getMaxHealth());
+                statement.setInt(12, getMana());
+                statement.setInt(13, getMaxMana());
+                statement.setInt(14, getFoodLevel());
+                if (getAthernaClass() != null)
+                    statement.setInt(15, getAthernaClass().getId());
+                else
+                    statement.setNull(15, INTEGER);
+                statement.setString(16, getLocation().getWorld().getName());
+                statement.setDouble(17, getLocation().getX());
+                statement.setDouble(18, getLocation().getY());
+                statement.setDouble(19, getLocation().getZ());
+                statement.setFloat(20, getLocation().getYaw());
+                statement.setFloat(21, getLocation().getPitch());
+                statement.setBoolean(22, isDead());
+                statement.setInt(23, getId());
+                statement.executeUpdate();
+            } catch (SQLException exception) {
+                plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to update a character",
+                        exception);
+            }
+        } else {
+            plugin.getLogger().log(SEVERE, "Database connection is not available. Cannot update character.");
         }
     }
 
     public void delete() {
         Connection connection = plugin.getDatabaseConnection();
-        try (PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM atherna_character WHERE id = ?"
-        )) {
-            statement.setInt(1, getId());
-            statement.executeUpdate();
-            plugin.getCharacterManager().uncache(this);
-        } catch (SQLException exception) {
-            plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to delete a character",
-                    exception);
+        if (connection != null) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "DELETE FROM atherna_character WHERE id = ?"
+            )) {
+                statement.setInt(1, getId());
+                statement.executeUpdate();
+            } catch (SQLException exception) {
+                plugin.getLogger().log(SEVERE, "An SQL exception occurred while attempting to delete a character",
+                        exception);
+            }
+        } else {
+            plugin.getLogger().log(SEVERE, "Database connection is not available. Cannot delete character.");
         }
     }
 

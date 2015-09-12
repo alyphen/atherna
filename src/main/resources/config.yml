@@ -23,3 +23,5 @@ characters:
         age:
             minimum: 0
             maximum: 1000
+classes:
+    default-class-id: 1

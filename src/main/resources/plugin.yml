@@ -7,3 +7,16 @@ commands:
         description: Character management command
         usage: /<command> [card|set|hide|unhide|switch]
         aliases: [char, c]
+    class:
+        description: Class management command
+        usage: /<command> [set|info|list|setlevel|addexp]
+    stats:
+        description: Allows you to view stats
+        usage: /<command> (player)
+permissions:
+    atherna.command.class.addexp:
+        description: Allows you to give players experience
+        default: op
+    atherna.command.class.setlevel:
+        description: Allows you to set player levels
+        default: op
