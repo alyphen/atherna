@@ -6,6 +6,12 @@
     <groupId>com.seventh-root</groupId>
     <artifactId>atherna</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+    <scm>
+        <connection>scm:git:https://github.com/alyphen/atherna.git</connection>
+        <url>https://github.com/alyphen/atherna</url>
+        <developerConnection>scm:git:https://github.com/alyphen/atherna.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <repositories>
         <repository>
             <id>spigot-repo</id>
