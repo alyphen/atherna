@@ -287,9 +287,9 @@ public class CharacterCommand implements CommandExecutor {
             if (player != null) {
                 AthernaCharacter character = player.getActiveCharacter();
                 if (character != null) {
-                    if (args.length > 2) {
+                    if (args.length > 1) {
                         StringBuilder descriptionBuilder = new StringBuilder();
-                        for (int i = 2; i < args.length; i++) {
+                        for (int i = 1; i < args.length; i++) {
                             descriptionBuilder.append(args[i]).append(" ");
                         }
                         String description = descriptionBuilder.toString();
