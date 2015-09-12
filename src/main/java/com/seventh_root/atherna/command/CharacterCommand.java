@@ -269,7 +269,7 @@ public class CharacterCommand implements CommandExecutor {
                 List<AthernaCharacter> characters = plugin.getCharacterManager().getByPlayer(player);
                 StringBuilder searchTermBuilder = new StringBuilder();
                 for (int i = 1; i < args.length; i++) {
-                    searchTermBuilder.append(args[i]);
+                    searchTermBuilder.append(args[i]).append(" ");
                 }
                 List<AthernaCharacter> filteredCharacters = characters.stream()
                         .filter(character -> character.getName().toLowerCase().contains(
