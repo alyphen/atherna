@@ -154,7 +154,7 @@ public class CharacterCommand implements CommandExecutor {
         if (args.length > 2) {
             StringBuilder descriptionBuilder = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                descriptionBuilder.append(args[i]);
+                descriptionBuilder.append(args[i]).append(" ");
             }
             String description = descriptionBuilder.toString();
             character.setDescription(description);
