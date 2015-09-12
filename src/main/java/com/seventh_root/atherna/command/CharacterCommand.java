@@ -38,6 +38,8 @@ public class CharacterCommand implements CommandExecutor {
                 characterSwitch(sender, args);
             } else if (args[0].equalsIgnoreCase("extenddescription")) {
                 characterExtendDescription(sender, args);
+            } else if (args[0].equalsIgnoreCase("list")) {
+                characterList(sender);
             } else {
                 sender.sendMessage(RED + "Usage: /" + label + " [card|set|hide|unhide|new|switch|extenddescription]");
             }
@@ -45,6 +47,21 @@ public class CharacterCommand implements CommandExecutor {
             sender.sendMessage(RED + "Usage: /" + label + " [card|set|hide|unhide|new|switch|extenddescription]");
         }
         return true;
+    }
+
+    private void characterList(CommandSender sender) {
+        if (sender instanceof Player) {
+            Player bukkitPlayer = (Player) sender;
+            AthernaPlayer player = plugin.getPlayerManager().getByBukkitPlayer(bukkitPlayer);
+            if (player != null) {
+                sender.sendMessage(GOLD + "Character list:");
+                plugin.getCharacterManager().getByPlayer(player).forEach(character -> sender.sendMessage(GRAY + " - " + character.getName()));
+            } else {
+                sender.sendMessage(RED + "You do not currently have an Atherna player associated");
+            }
+        } else {
+            sender.sendMessage(RED + "You must be a player to perform this command");
+        }
     }
 
     private void characterSet(CommandSender sender, String label, String[] args) {
