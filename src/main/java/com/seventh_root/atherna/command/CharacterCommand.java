@@ -294,7 +294,7 @@ public class CharacterCommand implements CommandExecutor {
                         }
                         String description = descriptionBuilder.toString();
                         character.setDescription(character.getDescription() + description);
-                        sender.sendMessage(GREEN + "Character description set to \"" + description + "\"");
+                        sender.sendMessage(GREEN + "Character description set to \"" + character.getDescription() + "\"");
                     } else {
                         sender.sendMessage(RED + "You must specify a description");
                     }
