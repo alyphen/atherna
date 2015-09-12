@@ -101,9 +101,9 @@ public class CharacterCommand implements CommandExecutor {
         if (args.length > 2) {
             StringBuilder nameBuilder = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                nameBuilder.append(args[i]);
+                nameBuilder.append(args[i]).append(" ");
             }
-            String name = nameBuilder.toString();
+            String name = nameBuilder.toString().substring(0, nameBuilder.length() - 1);
             character.setName(name);
             sender.sendMessage(GREEN + "Character name set to " + name);
         } else {
@@ -289,7 +289,6 @@ public class CharacterCommand implements CommandExecutor {
                 if (character != null) {
                     if (args.length > 2) {
                         StringBuilder descriptionBuilder = new StringBuilder();
-                        descriptionBuilder.append(" ");
                         for (int i = 2; i < args.length; i++) {
                             descriptionBuilder.append(args[i]).append(" ");
                         }
